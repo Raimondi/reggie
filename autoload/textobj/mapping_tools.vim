@@ -19,10 +19,7 @@ function! f.handle_mapping(id, visual, inner, mode) dict
   let options.inner = a:inner
   let options.mode = a:mode
   let options.count = self.get_count(options)
-  echo keys(self.criteria)
   let [pos1, pos2] = self.criteria.get_positions(options)
-  echo pos1
-  echo pos2
   if !self.valid_position(pos1[1:2]) || !self.valid_position(pos2[1:2])
     return self.cancel(options)
   endif
@@ -81,7 +78,6 @@ function! f.set_undo_ftplugin(id) dict abort
   if exists('b:undo_ftplugin') && b:undo_ftplugin !~ '^\s*$'
     let b:undo_ftplugin = undo_ftplugin . b:undo_ftplugin
   else
-   echom 1
     let b:undo_ftplugin = undo_ftplugin[:-3]
   endif
 endfunction "f.set_undo_ftplugin

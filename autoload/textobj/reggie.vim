@@ -10,7 +10,7 @@ function! c.get_positions(options) dict
   call self.reset(a:options)
   let to = self.get_text_object(a:options)
   let area = self.post_process_text_object(to, a:options)
-  echom 'c.gp: area => ' . area.to_s()
+  "echom 'c.gp: area => ' . area.to_s()
   return [area.start().to_gpos(), area.end().to_gpos()]
 endfunction "c.get_positions
 
@@ -27,7 +27,7 @@ function! c.post_process_text_object(to, options) dict abort
    elseif type == 'm'
      let arg = a:to.to_dl()
    else
-     echoe 'Post-Process Text Object: This should be seen, ever!'
+     echoe 'Post-Process Text Object: This should never be seen, ever!'
    endif
    let [pos1, pos2] = self.tools.systems[a:options.id].post_process(arg, a:options)
    return self.objects.new('area', self.objects.new('position', pos1), self.objects.new('position', pos2))
@@ -53,7 +53,7 @@ function! c.get_text_object(options) dict
     call pos1.position(getpos('.'))
     let to = self.find_text_object(pos1, a:options)
   endif
-  echom 'gto: to => ' . to.to_s()
+  "echom 'gto: to => ' . to.to_s()
   if !to.valid()
     return to
   endif
@@ -72,16 +72,16 @@ function! c.get_text_object(options) dict
       endif
     endif
   endif
-  echo 'gto: count => ' . a:options.count
+  "echo 'gto: count => ' . a:options.count
   for i in range(a:options.count - 1)
     let to_temp = self.expand_text_object(to, a:options)
-    echo 'gto: to_temp => ' . to_temp.to_s()
+    "echo 'gto: to_temp => ' . to_temp.to_s()
     if !to_temp.valid()
       break
     endif
     let to = to_temp
   endfor
-  echom 'gto: to => ' . to.to_s()
+  "echom 'gto: to => ' . to.to_s()
   return to
 endfunction "c.get_text_object
 
@@ -92,9 +92,9 @@ function! c.get_text_object_from_area(pos1, pos2, options) dict
     return self.find_text_object(a:pos1, a:options)
   endif
   let to1 = self.find_text_object(a:pos1, a:options)
-  echom 'c.gtofa: to1 => ' . to1.to_s()
+  "echom 'c.gtofa: to1 => ' . to1.to_s()
   let to2 = self.find_text_object(a:pos2, a:options)
-  echom 'c.gtofa: to2 => ' . to2.to_s()
+  "echom 'c.gtofa: to2 => ' . to2.to_s()
   let to = self.choose_text_object(to1, to2)
   if !to.valid() && to1.valid() && to2.valid() &&
         \ self.boundary_kind(to1.end()) == 'middle' &&
@@ -120,22 +120,22 @@ function! c.find_text_object(pos, options) dict
   let boundary = self.get_boundary(a:pos)
   let pos = self.objects.new('position')
   if self.boundary_kind(boundary) == 'start'
-    echom 'c.fto: '.1
+    "echom 'c.fto: '.1
     call to.start(boundary)
     call pos.position(self.find_from(a:pos, 1, a:options.inner))
     call to.end(self.get_boundary(pos))
   elseif self.boundary_kind(boundary) == 'middle' && a:options.inner
-    echom 'c.fto: '.2
+    "echom 'c.fto: '.2
     call to.start(boundary)
     call pos.position(self.find_from(a:pos, 1, a:options.inner))
     call to.end(self.get_boundary(pos))
   elseif self.boundary_kind(boundary) == 'end'
-    echom 'c.fto: '.3
+    "echom 'c.fto: '.3
     call to.end(boundary)
     call pos.position(self.find_from(a:pos, 0, a:options.inner))
     call to.start(self.get_boundary(pos))
   else
-    echom 'c.fto: '.4
+    "echom 'c.fto: '.4
     call pos.position(self.find_from(a:pos, 0, a:options.inner))
     call to.start(self.get_boundary(pos))
     call pos.position(self.find_from(a:pos, 1, a:options.inner))
@@ -147,23 +147,23 @@ endfunction "c.find_text_object
 " c.expand_text_object(to, options) dict abort "{{{3
 " Ditto
 function! c.expand_text_object(to, options) dict
-  echo 'c.eto: a:to => '.a:to.to_s()
+  "echo 'c.eto: a:to => '.a:to.to_s()
   let to = self.objects.new('text_object')
   let kind = self.text_object_kind(a:to)
   if kind == 'top' || kind == 'middle'
-    echo 1
+    "echo 1
     call to.start(a:to.start())
     call to.end(self.push_boundary(a:to.end(), 1, a:options.inner))
   elseif kind == 'bottom'
-    echo 2
+    "echo 2
     call to.start(self.push_boundary(a:to.start(), 0, a:options.inner))
     call to.end(a:to.end())
   elseif kind == 'whole'
-    echo 3
+    "echo 3
     call to.start(self.push_boundary(a:to.start(), 0, a:options.inner))
     call to.end(self.push_boundary(a:to.end(), 1, a:options.inner))
   else
-    echo 4
+    "echo 4
     return self.objects.new('text_object')
   endif
   if to.equal(a:to)
@@ -186,16 +186,16 @@ function! c.find_at(position) dict
   for kind in keys(filter(copy(self.patterns), 'v:val != ""'))
     if searchpos(self.patterns[kind], "cn", line(".")) == a:position.position()
       let result = [kind, 1]
-      echom 'c.fa: result => ' . string(result)
+      "echom 'c.fa: result => ' . string(result)
       break
     endif
     if searchpos(self.patterns[kind], "cne", line(".")) == a:position.position()
       let result = [kind, 0]
-      echom 'c.fa: result => ' . string(result)
+      "echom 'c.fa: result => ' . string(result)
       break
     endif
   endfor
-  echom 'c.fa: result => ' . string(result)
+  "echom 'c.fa: result => ' . string(result)
   return result
 endfunction "c.find_at
 
@@ -206,15 +206,15 @@ function! c.find_from(pos, forward, inner, ...) dict
   let pos = self.objects.new('position')
   let f_b = a:forward ? '' : 'b'
   let [matchHere, start] = self.find_at(a:pos)
-  echom 'c.ff: matchHere => ' . matchHere . ', forward => '. a:forward . ', inner => '. a:inner
+  "echom 'c.ff: matchHere => ' . matchHere . ', forward => '. a:forward . ', inner => '. a:inner
   if matchHere == 'start' && a:forward
-    echom 'c.ff: 1'
+    "echom 'c.ff: 1'
     let f_c = ''
   elseif matchHere == 'middle'
-    echom 'c.ff: 2'
+    "echom 'c.ff: 2'
     let f_c = ''
   elseif matchHere == 'end' && !a:forward
-    echom 'c.ff: 3'
+    "echom 'c.ff: 3'
     if !start
       " searchpair() doesn't detect the 'end' word under the cursor unles it's on
       " thecursor is at the beggining of it.
@@ -222,11 +222,11 @@ function! c.find_from(pos, forward, inner, ...) dict
     endif
     let f_c = ''
   else
-    echom 'c.ff: 4'
+    "echom 'c.ff: 4'
     let f_c = a:0 && a:1 ? 'c' : ''
   endif
   let flags = 'Wn'.f_b.f_c
-  echom 'c.ff: flags => ' . flags
+  "echom 'c.ff: flags => ' . flags
   let middle = (a:inner || get(self, 'always_middle', 0) ? self.patterns.middle : '')
   call pos.position(searchpairpos(self.patterns.start, middle, self.patterns.end, flags, self.skip))
   return pos
@@ -331,13 +331,13 @@ endfunction "textobj#reggie#setup
 " textobj#reggie#handle_mapping(...) "{{{2
 " Ditto
 function! textobj#reggie#handle_mapping(...)
-  redir => g:log
+  "redir => g:log
   let result = call(g:c.tools.handle_mapping, a:000, g:c.tools)
-  echo ' '
-  echom result
-  echo ' '
-  echo g:c.tools
-  redir END
+  "echo ' '
+  "echom result
+  "echo ' '
+  "echo g:c.tools
+  "redir END
   return result
 endfunction "textobj#reggie#handle_mapping
 
